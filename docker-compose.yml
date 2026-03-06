@@ -1,0 +1,154 @@
+version: '3.8'
+
+services:
+  # Database Services
+  mysql:
+    image: mysql:8.0
+    container_name: saas-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword123
+      MYSQL_DATABASE: saas_dashboard
+      MYSQL_USER: saas_user
+      MYSQL_PASSWORD: saas_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./schema_mysql.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./seed_mysql.sql:/docker-entrypoint-initdb.d/02-seed.sql
+    networks:
+      - saas-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  postgres:
+    image: postgres:15
+    container_name: saas-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: saas_dashboard
+      POSTGRES_USER: saas_user
+      POSTGRES_PASSWORD: saas_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./schema_postgres.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    networks:
+      - saas-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U saas_user -d saas_dashboard"]
+      timeout: 20s
+      retries: 10
+    profiles:
+      - postgres
+
+  redis:
+    image: redis:7-alpine
+    container_name: saas-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - saas-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      timeout: 10s
+      retries: 5
+
+  # Backend API
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: backend
+    container_name: saas-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      HOST: 0.0.0.0
+      DB_DIALECT: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: saas_dashboard
+      DB_USER: saas_user
+      DB_PASSWORD: saas_password
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CORS_ORIGIN: http://localhost:3000
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      UPLOAD_MAX_SIZE: 52428800
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./packages/backend/addons:/app/addons
+      - ./uploads:/app/uploads
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - saas-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # Frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: frontend
+    container_name: saas-frontend
+    restart: unless-stopped
+    environment:
+      VITE_API_URL: http://localhost:3001
+      VITE_WS_URL: ws://localhost:3001
+    ports:
+      - "3000:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - saas-network
+
+  # Nginx Reverse Proxy (Production)
+  nginx:
+    image: nginx:alpine
+    container_name: saas-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - ./packages/frontend/dist:/usr/share/nginx/html:ro
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - saas-network
+    profiles:
+      - production
+
+volumes:
+  mysql_data:
+    driver: local
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  saas-network:
+    driver: bridge

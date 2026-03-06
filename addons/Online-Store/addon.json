@@ -1,0 +1,98 @@
+{
+    "id": "online-store-addon",
+    "name": "Online-Store",
+    "description": "Easily manage products, categories, and orders directly from your dashboard",
+    "version": "1.0.1",
+    "author": "SaaS Dashboard Team",
+    "category": "E-Commerce",
+    "icon": "ShoppingCart",
+    "permissions": [
+        "read:products",
+        "write:products",
+        "delete:products",
+        "read:orders",
+        "write:orders"
+    ],
+    "sidebar": {
+        "icon": "ShoppingCart",
+        "position": 50,
+        "items": [
+            {
+                "title": "Stores",
+                "href": "/addon/Online-Store/stores",
+                "icon": "Store",
+                "componentPath": "Stores/index.jsx"
+            },
+            {
+                "title": "Dashboard",
+                "href": "/addon/Online-Store/dashboard",
+                "icon": "LayoutDashboard",
+                "componentPath": "Dashboard.jsx"
+            },
+            {
+                "title": "Products",
+                "href": "/addon/Online-Store/products",
+                "icon": "Package",
+                "componentPath": "Products/index.jsx"
+            },
+            {
+                "title": "Orders",
+                "href": "/addon/Online-Store/orders",
+                "icon": "ShoppingCart",
+                "componentPath": "Orders/index.jsx"
+            },
+            {
+                "title": "Analytics",
+                "href": "/addon/Online-Store/analytics",
+                "icon": "BarChart3",
+                "componentPath": "StoreAnalytics.jsx"
+            },
+            {
+                "title": "Preferences",
+                "href": "/addon/Online-Store/preferences",
+                "icon": "Settings",
+                "componentPath": "StoreSettings/StorePreferences.jsx"
+            }
+        ]
+    },
+    "frontend": {
+        "routes": [
+            {
+                "path": "/addon/Online-Store/stores",
+                "label": "Stores",
+                "componentPath": "Stores/index.jsx"
+            },
+            {
+                "path": "/addon/Online-Store/dashboard",
+                "label": "Dashboard",
+                "componentPath": "Dashboard.jsx"
+            },
+            {
+                "path": "/addon/Online-Store/products",
+                "label": "Products",
+                "componentPath": "Products/index.jsx"
+            },
+            {
+                "path": "/addon/Online-Store/orders",
+                "label": "Orders",
+                "componentPath": "Orders/index.jsx"
+            },
+            {
+                "path": "/addon/Online-Store/analytics",
+                "label": "Analytics",
+                "componentPath": "StoreAnalytics.jsx"
+            },
+            {
+                "path": "/addon/Online-Store/preferences",
+                "label": "Preferences",
+                "componentPath": "StoreSettings/StorePreferences.jsx"
+            },
+            {
+                "path": "/addon/Online-Store/orders/:id",
+                "label": "Order Details",
+                "componentPath": "Orders/OrderDetails.jsx",
+                "hidden": true
+            }
+        ]
+    }
+}

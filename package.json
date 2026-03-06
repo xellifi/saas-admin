@@ -1,0 +1,42 @@
+{
+  "name": "@saas-dashboard/monorepo",
+  "version": "1.0.0",
+  "description": "Production-ready SaaS Admin Dashboard with Modular Addon System",
+  "private": true,
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:frontend": "npm run dev --workspace=@saas-dashboard/frontend",
+    "dev:backend": "npm run dev --workspace=@saas-dashboard/backend",
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:backend": "npm run build --workspace=@saas-dashboard/backend",
+    "build:frontend": "npm run build --workspace=@saas-dashboard/frontend",
+    "start": "npm run start --workspace=@saas-dashboard/backend",
+    "preview": "npm run preview --workspace=@saas-dashboard/frontend",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "clean": "npm run clean --workspaces --if-present && rm -rf node_modules",
+    "install:all": "npm install && npm run build",
+    "db:migrate": "npm run db:migrate --workspace=@saas-dashboard/backend",
+    "db:seed": "npm run db:seed --workspace=@saas-dashboard/backend",
+    "docker:build": "docker build -t saas-dashboard .",
+    "docker:run": "docker-compose up -d",
+    "docker:stop": "docker-compose down",
+    "pm2:start": "pm2 start ecosystem.config.js",
+    "pm2:restart": "pm2 restart ecosystem.config.js",
+    "pm2:stop": "pm2 stop ecosystem.config.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "concurrently": "^8.2.2",
+    "typescript": "^5.3.3",
+    "eslint": "^8.55.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.2",
+    "@typescript-eslint/parser": "^6.13.2"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
+  "packageManager": "npm@10.0.0"
+}

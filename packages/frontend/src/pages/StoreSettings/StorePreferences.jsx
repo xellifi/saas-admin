@@ -1,0 +1,677 @@
+import React, { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import api from '@/lib/api';
+import { useAuthStore } from '@/stores/auth';
+import { useConfirmDialog } from '@/contexts/ConfirmDialogContext';
+import {
+    Save,
+    RefreshCw,
+    Settings,
+    Globe,
+    Mail,
+    Phone,
+    MapPin,
+    CreditCard,
+    Truck,
+    Bell,
+    Palette,
+    Package,
+    Users,
+    Shield,
+    Loader2,
+    Check,
+    X,
+    Info
+} from 'lucide-react';
+import { toast } from '@/components/ui/Toast';
+import Notification from '@/components/ui/Notification';
+
+export default function StorePreferences() {
+    const { user } = useAuthStore();
+    const { confirm } = useConfirmDialog();
+    const queryClient = useQueryClient();
+    
+    const [selectedStoreId, setSelectedStoreId] = useState('');
+    const [preferences, setPreferences] = useState({});
+    const [hasChanges, setHasChanges] = useState(false);
+    const [activeCategory, setActiveCategory] = useState('general');
+
+    // Get stores
+    const { data: stores, isLoading: storesLoading } = useQuery({
+        queryKey: ['online-store-list', user?.id],
+        queryFn: async () => {
+            const response = await api.get('/addons/online-store/admin/stores', { accountId: user?.id });
+            return response.data || [];
+        },
+        enabled: !!user?.id
+    });
+
+    // Get store preferences
+    const { data: storeData, isLoading: prefsLoading } = useQuery({
+        queryKey: ['store-preferences', selectedStoreId],
+        queryFn: async () => {
+            if (!selectedStoreId) return null;
+            const response = await api.get(`/addons/online-store/admin/stores/${selectedStoreId}`, { accountId: user?.id });
+            return response.data;
+        },
+        enabled: !!selectedStoreId
+    });
+
+    // Update preferences mutation
+    const updateMutation = useMutation({
+        mutationFn: ({ storeId, preferences }) => 
+            api.put(`/addons/online-store/admin/stores/${storeId}/preferences`, { 
+                accountId: user?.id, 
+                preferences 
+            }),
+        onSuccess: () => {
+            queryClient.invalidateQueries(['store-preferences', selectedStoreId]);
+            toast.push(
+                <Notification type="success" title="Preferences Saved">
+                    Store preferences have been saved successfully.
+                </Notification>
+            );
+            // Don't reset hasChanges to false - let user continue making changes
+            // setHasChanges(false);
+        },
+        onError: (err) => {
+            toast.push(<Notification type="danger" title="Error" message={err.message} />);
+        }
+    });
+
+    useEffect(() => {
+        if (storeData?.preferences) {
+            const prefs = {};
+            storeData.preferences.forEach(pref => {
+                let value = pref.setting_value;
+                if (pref.setting_type === 'boolean') {
+                    value = value === 'true';
+                } else if (pref.setting_type === 'number') {
+                    value = parseFloat(value);
+                } else if (pref.setting_type === 'json') {
+                    try {
+                        value = JSON.parse(value);
+                    } catch {
+                        value = {};
+                    }
+                }
+                prefs[pref.setting_key] = {
+                    value,
+                    type: pref.setting_type,
+                    category: pref.category,
+                    public: pref.is_public
+                };
+            });
+            setPreferences(prefs);
+        }
+    }, [storeData]);
+
+    const handlePreferenceChange = (key, value, type = 'string') => {
+        setPreferences(prev => ({
+            ...prev,
+            [key]: {
+                ...prev[key],
+                value: type === 'json' && typeof value === 'object' ? JSON.stringify(value) : value,
+                type
+            }
+        }));
+        setHasChanges(true);
+    };
+
+    const handleSave = () => {
+        if (!selectedStoreId) return;
+        
+        const prefsToUpdate = {};
+        Object.entries(preferences).forEach(([key, pref]) => {
+            prefsToUpdate[key] = {
+                value: pref.value,
+                type: pref.type,
+                category: pref.category,
+                public: pref.public
+            };
+        });
+        
+        updateMutation.mutate({ storeId: selectedStoreId, preferences: prefsToUpdate });
+    };
+
+    const handleReset = async () => {
+        const result = await confirm({
+            title: 'Reset Preferences',
+            message: 'Are you sure you want to reset all preferences to default values? This action cannot be undone.',
+            confirmText: 'Reset',
+            cancelText: 'Cancel',
+            confirmVariant: 'danger'
+        });
+
+        if (result) {
+            // Call the reset API endpoint
+            try {
+                await api.put(`/addons/online-store/admin/stores/${selectedStoreId}/preferences/reset`, { 
+                    accountId: user?.id 
+                });
+                
+                // Refresh the preferences data
+                queryClient.invalidateQueries(['store-preferences', selectedStoreId]);
+                
+                toast.push(
+                    <Notification type="success" title="Preferences Reset">
+                        All preferences have been reset to default values.
+                    </Notification>
+                );
+            } catch (error) {
+                toast.push(
+                    <Notification type="danger" title="Reset Failed">
+                        Failed to reset preferences. Please try again.
+                    </Notification>
+                );
+            }
+        }
+    };
+
+    const categories = [
+        { id: 'general', label: 'General', icon: Globe, color: 'blue' },
+        { id: 'display', label: 'Display', icon: Palette, color: 'purple' },
+        { id: 'checkout', label: 'Checkout', icon: CreditCard, color: 'green' },
+        { id: 'shipping', label: 'Shipping', icon: Truck, color: 'amber' },
+        { id: 'tax', label: 'Tax', icon: Shield, color: 'red' },
+        { id: 'notifications', label: 'Notifications', icon: Bell, color: 'indigo' },
+        { id: 'billing', label: 'Billing', icon: DollarSign, color: 'emerald' },
+        { id: 'payments', label: 'Payments', icon: CreditCard, color: 'cyan' }
+    ];
+
+    const renderCategoryContent = () => {
+        const categoryPrefs = Object.entries(preferences).filter(([_, pref]) => pref.category === activeCategory);
+
+        switch (activeCategory) {
+            case 'general':
+                return (
+                    <div className="space-y-6">
+                        <div>
+                            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                                Store Description
+                            </label>
+                            <textarea
+                                value={preferences.store_description?.value || ''}
+                                onChange={(e) => handlePreferenceChange('store_description', e.target.value, 'string')}
+                                rows={3}
+                                className="w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
+                                placeholder="Describe your store and what makes it unique..."
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                                    Store Email
+                                </label>
+                                <input
+                                    type="email"
+                                    value={preferences.store_email?.value || ''}
+                                    onChange={(e) => handlePreferenceChange('store_email', e.target.value, 'string')}
+                                    className="w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
+                                    placeholder="contact@store.com"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                                    Store Phone
+                                </label>
+                                <input
+                                    type="tel"
+                                    value={preferences.store_phone?.value || ''}
+                                    onChange={(e) => handlePreferenceChange('store_phone', e.target.value, 'string')}
+                                    className="w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
+                                    placeholder="+1 (555) 123-4567"
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                                Store Address
+                            </label>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <input
+                                    type="text"
+                                    placeholder="Street Address"
+                                    className="px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="City"
+                                    className="px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="State/Province"
+                                    className="px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="ZIP/Postal Code"
+                                    className="px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                );
+
+            case 'display':
+                return (
+                    <div className="space-y-6">
+                        <div>
+                            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                                Products Per Page
+                            </label>
+                            <select
+                                value={preferences.products_per_page?.value || 12}
+                                onChange={(e) => handlePreferenceChange('products_per_page', parseInt(e.target.value), 'number')}
+                                className="w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
+                            >
+                                <option value={6}>6 products</option>
+                                <option value={12}>12 products</option>
+                                <option value={24}>24 products</option>
+                                <option value={36}>36 products</option>
+                                <option value={48}>48 products</option>
+                            </select>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                            <div>
+                                <h4 className="font-bold text-gray-900 dark:text-white">Show Out of Stock Products</h4>
+                                <p className="text-sm text-gray-500">Display products that are currently out of stock</p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => handlePreferenceChange('show_out_of_stock', !preferences.show_out_of_stock?.value, 'boolean')}
+                                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${
+                                    preferences.show_out_of_stock?.value ? 'bg-blue-600' : 'bg-gray-300'
+                                }`}
+                            >
+                                <span
+                                    className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
+                                        preferences.show_out_of_stock?.value ? 'translate-x-7' : 'translate-x-1'
+                                    }`}
+                                />
+                            </button>
+                        </div>
+                    </div>
+                );
+
+            case 'checkout':
+                return (
+                    <div className="space-y-6">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                            <div>
+                                <h4 className="font-bold text-gray-900 dark:text-white">Require Phone Number</h4>
+                                <p className="text-sm text-gray-500">Make phone number required during checkout</p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => handlePreferenceChange('require_phone', !preferences.require_phone?.value, 'boolean')}
+                                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${
+                                    preferences.require_phone?.value ? 'bg-blue-600' : 'bg-gray-300'
+                                }`}
+                            >
+                                <span
+                                    className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
+                                        preferences.require_phone?.value ? 'translate-x-7' : 'translate-x-1'
+                                    }`}
+                                />
+                            </button>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                            <div>
+                                <h4 className="font-bold text-gray-900 dark:text-white">Enable Guest Checkout</h4>
+                                <p className="text-sm text-gray-500">Allow customers to checkout without creating an account</p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => handlePreferenceChange('enable_guest_checkout', !preferences.enable_guest_checkout?.value, 'boolean')}
+                                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${
+                                    preferences.enable_guest_checkout?.value ? 'bg-blue-600' : 'bg-gray-300'
+                                }`}
+                            >
+                                <span
+                                    className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
+                                        preferences.enable_guest_checkout?.value ? 'translate-x-7' : 'translate-x-1'
+                                    }`}
+                                />
+                            </button>
+                        </div>
+                    </div>
+                );
+
+            case 'shipping':
+                return (
+                    <div className="space-y-6">
+                        <div>
+                            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                                Free Shipping Threshold
+                            </label>
+                            <div className="relative">
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">$</span>
+                                <input
+                                    type="number"
+                                    value={preferences.free_shipping_threshold?.value || 0}
+                                    onChange={(e) => handlePreferenceChange('free_shipping_threshold', parseFloat(e.target.value), 'number')}
+                                    className="w-full pl-8 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
+                                    placeholder="0.00"
+                                    step="0.01"
+                                    min="0"
+                                />
+                            </div>
+                            <p className="text-sm text-gray-500 mt-2">
+                                Orders above this amount qualify for free shipping. Set to 0 to disable.
+                            </p>
+                        </div>
+                    </div>
+                );
+
+            case 'tax':
+                return (
+                    <div className="space-y-6">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                            <div>
+                                <h4 className="font-bold text-gray-900 dark:text-white">Tax Included in Prices</h4>
+                                <p className="text-sm text-gray-500">Show prices including tax</p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => handlePreferenceChange('tax_included', !preferences.tax_included?.value, 'boolean')}
+                                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${
+                                    preferences.tax_included?.value ? 'bg-blue-600' : 'bg-gray-300'
+                                }`}
+                            >
+                                <span
+                                    className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
+                                        preferences.tax_included?.value ? 'translate-x-7' : 'translate-x-1'
+                                    }`}
+                                />
+                            </button>
+                        </div>
+                    </div>
+                );
+
+            case 'notifications':
+                return (
+                    <div className="space-y-6">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                            <div>
+                                <h4 className="font-bold text-gray-900 dark:text-white">New Order Email</h4>
+                                <p className="text-sm text-gray-500">Send email notification for new orders</p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => handlePreferenceChange('new_order_email', !preferences.new_order_email?.value, 'boolean')}
+                                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${
+                                    preferences.new_order_email?.value ? 'bg-blue-600' : 'bg-gray-300'
+                                }`}
+                            >
+                                <span
+                                    className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
+                                        preferences.new_order_email?.value ? 'translate-x-7' : 'translate-x-1'
+                                    }`}
+                                />
+                            </button>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                            <div>
+                                <h4 className="font-bold text-gray-900 dark:text-white">Low Stock Email</h4>
+                                <p className="text-sm text-gray-500">Send email when products run low on stock</p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => handlePreferenceChange('low_stock_email', !preferences.low_stock_email?.value, 'boolean')}
+                                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${
+                                    preferences.low_stock_email?.value ? 'bg-blue-600' : 'bg-gray-300'
+                                }`}
+                            >
+                                <span
+                                    className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
+                                        preferences.low_stock_email?.value ? 'translate-x-7' : 'translate-x-1'
+                                    }`}
+                                />
+                            </button>
+                        </div>
+                    </div>
+                );
+
+            case 'billing':
+                return (
+                    <div className="space-y-6">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                            <div>
+                                <h4 className="font-bold text-gray-900 dark:text-white">Billing Currency</h4>
+                                <p className="text-sm text-gray-500">Default currency for billing and pricing</p>
+                            </div>
+                            <select
+                                value={preferences.billing_currency?.value || 'USD'}
+                                onChange={(e) => handlePreferenceChange('billing_currency', e.target.value, 'string')}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            >
+                                <option value="USD">USD ($)</option>
+                                <option value="EUR">EUR (€)</option>
+                                <option value="GBP">GBP (£)</option>
+                                <option value="PHP">PHP (₱)</option>
+                            </select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                            <div>
+                                <h4 className="font-bold text-gray-900 dark:text-white">Tax Calculation</h4>
+                                <p className="text-sm text-gray-500">How taxes are calculated</p>
+                            </div>
+                            <select
+                                value={preferences.tax_calculation?.value || 'inclusive'}
+                                onChange={(e) => handlePreferenceChange('tax_calculation', e.target.value, 'string')}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            >
+                                <option value="inclusive">Tax Included</option>
+                                <option value="exclusive">Tax Excluded</option>
+                            </select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                            <div>
+                                <h4 className="font-bold text-gray-900 dark:text-white">Invoice Prefix</h4>
+                                <p className="text-sm text-gray-500">Prefix for invoice numbers</p>
+                            </div>
+                            <input
+                                type="text"
+                                value={preferences.invoice_prefix?.value || ''}
+                                onChange={(e) => handlePreferenceChange('invoice_prefix', e.target.value, 'string')}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="INV-"
+                                maxLength={10}
+                            />
+                        </div>
+                    </div>
+                );
+
+            case 'payments':
+                return (
+                    <div className="space-y-6">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                            <div>
+                                <h4 className="font-bold text-gray-900 dark:text-white">Stripe Integration</h4>
+                                <p className="text-sm text-gray-500">Enable Stripe payment processing</p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => handlePreferenceChange('stripe_enabled', !preferences.stripe_enabled?.value, 'boolean')}
+                                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${
+                                    preferences.stripe_enabled?.value ? 'bg-blue-600' : 'bg-gray-300'
+                                }`}
+                            >
+                                <span
+                                    className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
+                                        preferences.stripe_enabled?.value ? 'translate-x-7' : 'translate-x-1'
+                                    }`}
+                                />
+                            </button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                            <div>
+                                <h4 className="font-bold text-gray-900 dark:text-white">PayPal Integration</h4>
+                                <p className="text-sm text-gray-500">Enable PayPal payment processing</p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => handlePreferenceChange('paypal_enabled', !preferences.paypal_enabled?.value, 'boolean')}
+                                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${
+                                    preferences.paypal_enabled?.value ? 'bg-blue-600' : 'bg-gray-300'
+                                }`}
+                            >
+                                <span
+                                    className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
+                                        preferences.paypal_enabled?.value ? 'translate-x-7' : 'translate-x-1'
+                                    }`}
+                                />
+                            </button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                            <div>
+                                <h4 className="font-bold text-gray-900 dark:text-white">Cash on Delivery</h4>
+                                <p className="text-sm text-gray-500">Accept cash payments on delivery</p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => handlePreferenceChange('cash_on_delivery', !preferences.cash_on_delivery?.value, 'boolean')}
+                                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${
+                                    preferences.cash_on_delivery?.value ? 'bg-blue-600' : 'bg-gray-300'
+                                }`}
+                            >
+                                <span
+                                    className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
+                                        preferences.cash_on_delivery?.value ? 'translate-x-7' : 'translate-x-1'
+                                    }`}
+                                />
+                            </button>
+                        </div>
+                    </div>
+                );
+
+            default:
+                return (
+                    <div className="text-center py-12">
+                        <Settings className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-500 font-medium">No preferences available for this category.</p>
+                    </div>
+                );
+        }
+    };
+
+    if (storesLoading) {
+        return (
+            <div className="flex items-center justify-center p-20">
+                <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+                <span className="ml-2 text-gray-600 dark:text-gray-400">Loading stores...</span>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-8">
+            {/* Header */}
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-3xl font-black tracking-tighter text-gray-900 dark:text-white mb-2">
+                        Store Preferences
+                    </h1>
+                    <p className="text-gray-500 font-medium">Configure detailed settings and preferences for your stores</p>
+                </div>
+                
+                <div className="flex items-center gap-3">
+                    {hasChanges && (
+                        <button
+                            onClick={handleSave}
+                            disabled={updateMutation.isLoading}
+                            className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {updateMutation.isLoading ? (
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                            ) : (
+                                <Save className="w-5 h-5" />
+                            )}
+                            Save Changes
+                        </button>
+                    )}
+                    
+                    <button
+                        onClick={handleReset}
+                        className="flex items-center gap-2 px-6 py-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl font-bold hover:bg-gray-200 dark:hover:bg-gray-700 transition-all"
+                    >
+                        <RefreshCw className="w-5 h-5" />
+                        Reset to Defaults
+                    </button>
+                </div>
+            </div>
+
+            {/* Store Selector */}
+            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
+                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                    Select Store
+                </label>
+                <select
+                    value={selectedStoreId}
+                    onChange={(e) => setSelectedStoreId(e.target.value)}
+                    className="w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-bold"
+                >
+                    <option value="">Choose a store...</option>
+                    {stores?.map(store => (
+                        <option key={store.id} value={store.id}>
+                            {store.store_name} ({store.store_slug})
+                        </option>
+                    ))}
+                </select>
+            </div>
+
+            {selectedStoreId && (
+                <>
+                    {/* Category Tabs */}
+                    <div className="flex overflow-x-auto bg-gray-100 dark:bg-gray-800 rounded-xl p-1">
+                        {categories.map((category) => {
+                            const Icon = category.icon;
+                            return (
+                                <button
+                                    key={category.id}
+                                    onClick={() => setActiveCategory(category.id)}
+                                    className={`flex items-center gap-2 px-4 py-3 rounded-lg font-bold text-sm transition-all whitespace-nowrap ${
+                                        activeCategory === category.id
+                                            ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                                            : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                                    }`}
+                                >
+                                    <Icon size={16} />
+                                    {category.label}
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    {/* Content */}
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-8">
+                        {prefsLoading ? (
+                            <div className="flex items-center justify-center py-12">
+                                <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
+                                <span className="ml-2 text-gray-600 dark:text-gray-400">Loading preferences...</span>
+                            </div>
+                        ) : (
+                            renderCategoryContent()
+                        )}
+                    </div>
+                </>
+            )}
+
+            {!selectedStoreId && (
+                <div className="text-center py-20 bg-gray-50/50 dark:bg-gray-900/30 rounded-3xl border-2 border-dashed border-gray-200 dark:border-gray-700">
+                    <Settings className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Select a Store</h3>
+                    <p className="text-gray-500 font-medium">Choose a store to configure its preferences and settings.</p>
+                </div>
+            )}
+        </div>
+    );
+}

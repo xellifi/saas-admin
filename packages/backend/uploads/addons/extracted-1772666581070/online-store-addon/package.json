@@ -1,0 +1,56 @@
+{
+    "name": "online-store-addon",
+    "version": "1.0.0",
+    "description": "A fully functional Online Store addon for the SaaS Dashboard",
+    "main": "backend/index.js",
+    "type": "module",
+    "keywords": [
+        "store",
+        "ecommerce",
+        "products",
+        "sales"
+    ],
+    "author": "SaaS Dashboard Team",
+    "license": "MIT",
+    "engines": {
+        "node": ">=18.0.0"
+    },
+    "dependencies": {},
+    "saas-dashboard": {
+        "displayName": "Online Store",
+        "description": "Easily manage products, categories, and orders directly from your dashboard",
+        "category": "E-Commerce",
+        "icon": "shopping-cart",
+        "version": "1.0.0",
+        "permissions": [
+            "read:products",
+            "write:products",
+            "delete:products",
+            "read:orders",
+            "write:orders"
+        ],
+        "routes": [
+            "/api/store/products",
+            "/api/store/categories",
+            "/api/store/orders"
+        ],
+        "settings": {
+            "currency": {
+                "type": "select",
+                "default": "USD",
+                "options": [
+                    "USD",
+                    "EUR",
+                    "GBP",
+                    "CAD"
+                ],
+                "label": "Store Currency"
+            },
+            "tax_rate": {
+                "type": "number",
+                "default": 0,
+                "label": "Default Tax Rate (%)"
+            }
+        }
+    }
+}
