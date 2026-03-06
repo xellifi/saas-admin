@@ -1,28 +1,25 @@
 import React, { useEffect } from 'react'
 import { X } from 'lucide-react'
-import type { MouseEvent } from 'react'
 
 interface DialogProps {
   isOpen: boolean
-  onClose: (e: MouseEvent) => void
-  onRequestClose: (e: MouseEvent) => void
+  onRequestClose?: (e: any) => void
   children: React.ReactNode
   title?: string
   size?: 'sm' | 'md' | 'lg' | 'xl'
 }
 
-const Dialog: React.FC<DialogProps> = ({ 
-  isOpen, 
-  onClose, 
-  onRequestClose, 
-  children, 
+const Dialog: React.FC<DialogProps> = ({
+  isOpen,
+  onRequestClose,
+  children,
   title,
-  size = 'md' 
+  size = 'md'
 }) => {
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
-        onRequestClose(e as any)
+        onRequestClose?.(e as any)
       }
     }
 
@@ -55,14 +52,14 @@ const Dialog: React.FC<DialogProps> = ({
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       {/* Backdrop */}
-      <div 
+      <div
         className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
-        onClick={onRequestClose}
+        onClick={(e) => onRequestClose?.(e as any)}
       />
-      
+
       {/* Dialog */}
       <div className="flex min-h-full items-center justify-center p-4">
-        <div 
+        <div
           className={`
             relative w-full bg-white dark:bg-gray-800 rounded-lg shadow-xl 
             transform transition-all duration-300 ease-out
@@ -79,7 +76,7 @@ const Dialog: React.FC<DialogProps> = ({
               )}
               {onRequestClose && (
                 <button
-                  onClick={(e) => onRequestClose(e)}
+                  onClick={(e) => onRequestClose?.(e)}
                   className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                 >
                   <X className="w-5 h-5 text-gray-400" />
@@ -87,7 +84,7 @@ const Dialog: React.FC<DialogProps> = ({
               )}
             </div>
           )}
-          
+
           {/* Content */}
           <div className="p-6">
             {children}

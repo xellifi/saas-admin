@@ -15,7 +15,6 @@ import {
   Globe,
   Camera
 } from 'lucide-react'
-import { useAuthStore } from '@/stores/auth'
 import { toast } from '@/components/ui/Toast'
 import Notification from '@/components/ui/Notification'
 import { useConfirmDialog } from '@/contexts/ConfirmDialogContext'
@@ -23,7 +22,6 @@ import { useConfirmDialog } from '@/contexts/ConfirmDialogContext'
 const Profile: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { user: currentUser } = useAuthStore()
   const [isEditing, setIsEditing] = useState(false)
   const [activeTab, setActiveTab] = useState<'overview' | 'activity' | 'security'>('overview')
 

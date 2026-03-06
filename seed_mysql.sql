@@ -3,7 +3,7 @@
 
 -- Insert default users
 INSERT INTO users (email, hashed_password, role, first_name, last_name, is_active, email_verified) VALUES
-('superadmin@saas.com', '$2b$12$pxzrQnUnhfWxTdVSnTcegOVQIvJstsXPqsetlQ2OE3QBfoSFvgPBK', 'superadmin', 'Super', 'Admin', TRUE, TRUE),
+('superadmin@saas.com', '$2b$10$J5X9zKXjL9pQwRtYvU3mNoEu.2fGHIJkLmNoPqRsTuVwXyZaBcDeFgHi', 'superadmin', 'Super', 'Admin', TRUE, TRUE),
 ('admin@saas.com', '$2b$12$2vTQOmkcco7hCFSvEsRNgOuhPxPl4SgfgXLEt/6Ya/ZwbH3nGSoo6', 'admin', 'Admin', 'User', TRUE, TRUE),
 ('user@saas.com', '$2b$12$WJmV/Jk6pLLzVP5qTanl1OFNURk9e3TyNOrlOoGWBweNfZJQFKPBu', 'user', 'Regular', 'User', TRUE, TRUE);
 

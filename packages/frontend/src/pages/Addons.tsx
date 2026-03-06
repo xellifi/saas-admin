@@ -3,13 +3,10 @@ import {
   Puzzle,
   Upload,
   Download,
-  Settings,
   Trash2,
   Play,
-  Square,
   Package,
   CheckCircle,
-  Clock,
   RefreshCw
 } from 'lucide-react'
 import { Addon } from '@/types'
@@ -119,7 +116,7 @@ const Addons: React.FC = () => {
   }
 
   const handleUninstallAddon = async (addon: Addon) => {
-    const result = await confirm({
+    await confirm({
       title: 'Uninstall Addon',
       message: `Are you sure you want to uninstall "${addon.name}"? This will remove its data and integrations, but keep the files so you can reinstall later.`,
       confirmText: 'Uninstall',
@@ -147,7 +144,7 @@ const Addons: React.FC = () => {
       return
     }
 
-    const result = await confirm({
+    await confirm({
       title: 'Delete Addon',
       message: `Are you sure you want to completely delete "${addon.name}"? This removes the files permanently.`,
       confirmText: 'Delete',
@@ -182,14 +179,6 @@ const Addons: React.FC = () => {
     return 'px-2 py-1 text-amber-600 dark:text-amber-500 font-bold text-xs uppercase tracking-wider rounded border border-amber-500/50 dark:border-amber-400/50'
   }
 
-  // Format date
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
-  }
 
   return (
     <div className="space-y-6">
@@ -333,80 +322,80 @@ const Addons: React.FC = () => {
           {addons.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {addons.map((addon) => (
-              <div key={addon.id} className="card p-6 flex flex-col h-full">
-                {/* Header */}
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 rounded-lg flex items-center justify-center">
-                      <Puzzle className="w-6 h-6 text-gray-900 dark:text-white" />
+                <div key={addon.id} className="card p-6 flex flex-col h-full">
+                  {/* Header */}
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-12 h-12 rounded-lg flex items-center justify-center">
+                        <Puzzle className="w-6 h-6 text-gray-900 dark:text-white" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white">
+                          {addon.name}
+                        </h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          v{addon.version}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900 dark:text-white">
-                        {addon.name}
-                      </h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        v{addon.version}
-                      </p>
-                    </div>
+
+                    {/* Status Badge */}
+                    <span className={`text-xs ${getStatusColor(addon.isEnabled, addon.isInstalled)} text-right`}>
+                      {getStatusText(addon.isEnabled, addon.isInstalled)}
+                    </span>
                   </div>
 
-                  {/* Status Badge */}
-                  <span className={`text-xs ${getStatusColor(addon.isEnabled, addon.isInstalled)} text-right`}>
-                    {getStatusText(addon.isEnabled, addon.isInstalled)}
-                  </span>
-                </div>
+                  {/* Description */}
+                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2 flex-grow">
+                    {addon.description || 'No description provided.'}
+                  </p>
 
-                {/* Description */}
-                <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2 flex-grow">
-                  {addon.description || 'No description provided.'}
-                </p>
-
-                {/* Author */}
-                {addon.author && (
-                  <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-4">
-                    <span>by {addon.author}</span>
-                  </div>
-                )}
-
-                {/* Actions */}
-                <div className="flex gap-2 mt-auto pt-4 border-t border-gray-100 dark:border-gray-800">
-                  {!addon.isInstalled ? (
-                    <>
-                      <button
-                        onClick={() => handleInstallAddon(addon)}
-                        className="flex-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all font-medium"
-                      >
-                        Install
-                      </button>
-                      <button
-                        onClick={() => handleDeleteAddon(addon)}
-                        className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-500 px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all font-medium"
-                        title="Delete Addon Files"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button
-                        onClick={() => handleToggleAddon(addon)}
-                        className="flex-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all font-medium"
-                      >
-                        {addon.isEnabled ? 'Disable' : 'Enable'}
-                      </button>
-                      <button
-                        onClick={() => handleUninstallAddon(addon)}
-                        className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all font-medium"
-                        title="Uninstall Addon"
-                      >
-                        Uninstall
-                      </button>
-                    </>
+                  {/* Author */}
+                  {addon.author && (
+                    <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-4">
+                      <span>by {addon.author}</span>
+                    </div>
                   )}
+
+                  {/* Actions */}
+                  <div className="flex gap-2 mt-auto pt-4 border-t border-gray-100 dark:border-gray-800">
+                    {!addon.isInstalled ? (
+                      <>
+                        <button
+                          onClick={() => handleInstallAddon(addon)}
+                          className="flex-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all font-medium"
+                        >
+                          Install
+                        </button>
+                        <button
+                          onClick={() => handleDeleteAddon(addon)}
+                          className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-500 px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all font-medium"
+                          title="Delete Addon Files"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => handleToggleAddon(addon)}
+                          className="flex-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all font-medium"
+                        >
+                          {addon.isEnabled ? 'Disable' : 'Enable'}
+                        </button>
+                        <button
+                          onClick={() => handleUninstallAddon(addon)}
+                          className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all font-medium"
+                          title="Uninstall Addon"
+                        >
+                          Uninstall
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
           ) : (
             /* Empty State */
             <div className="card p-12 text-center">

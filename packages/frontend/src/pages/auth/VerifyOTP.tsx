@@ -17,7 +17,7 @@ const VerifyOTP: React.FC = () => {
   const [success, setSuccess] = useState(false)
   const [timeLeft, setTimeLeft] = useState(300) // 5 minutes
   const [resendEnabled, setResendEnabled] = useState(false)
-  
+
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -51,14 +51,14 @@ const VerifyOTP: React.FC = () => {
     return () => clearInterval(timer)
   }, [email, navigate])
 
-  const onSubmit = async (data: OTPFormData) => {
+  const onSubmit = async (_data: OTPFormData) => {
     try {
       setIsLoading(true)
       setError('')
-      
+
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 2000))
-      
+
       setSuccess(true)
     } catch (err: any) {
       setError(err.message || 'Invalid OTP')
@@ -71,10 +71,10 @@ const VerifyOTP: React.FC = () => {
     try {
       setIsLoading(true)
       setError('')
-      
+
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000))
-      
+
       setTimeLeft(300)
       setResendEnabled(false)
     } catch (err: any) {
@@ -105,8 +105,8 @@ const VerifyOTP: React.FC = () => {
               Your email has been successfully verified. You can now log in to your account.
             </p>
             <div className="mt-6">
-              <Link 
-                to="/login" 
+              <Link
+                to="/login"
                 className="btn btn-primary btn-md"
               >
                 Continue to login
@@ -122,8 +122,8 @@ const VerifyOTP: React.FC = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <Link 
-            to="/forgot-password" 
+          <Link
+            to="/forgot-password"
             className="flex items-center text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />

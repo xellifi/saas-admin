@@ -40,9 +40,10 @@ export interface Plan {
   price: string;
   currency: string;
   billingCycle: string;
-  features: Record<string, any>;
+  features: string[] | Record<string, any>;
   isActive: boolean;
   maxUsers: number;
+  currentUsers?: number;
   maxStorage: number;
   createdAt: string;
   updatedAt: string;

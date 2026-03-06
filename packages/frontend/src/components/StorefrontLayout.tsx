@@ -2,7 +2,14 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingBag, Search, Menu, X } from 'lucide-react';
 
-export default function StorefrontLayout({ children, storeName, cartCount = 0, onOpenCart }) {
+interface StorefrontLayoutProps {
+    children: React.ReactNode;
+    storeName?: string;
+    cartCount?: number;
+    onOpenCart?: () => void;
+}
+
+export default function StorefrontLayout({ children, storeName, cartCount = 0, onOpenCart }: StorefrontLayoutProps) {
     const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
     return (

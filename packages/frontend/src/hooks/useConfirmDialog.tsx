@@ -1,5 +1,4 @@
 import { useState, useCallback } from 'react'
-import type { MouseEvent } from 'react'
 
 interface ConfirmDialogOptions {
   title: string
@@ -22,7 +21,7 @@ export const useConfirmDialog = () => {
     confirmText: 'Confirm',
     cancelText: 'Cancel',
     confirmVariant: 'primary',
-    onConfirm: () => {}
+    onConfirm: () => { }
   })
 
   const confirm = useCallback((options: ConfirmDialogOptions) => {
@@ -57,11 +56,11 @@ export const useConfirmDialog = () => {
     return (
       <div className="fixed inset-0 z-50 overflow-y-auto">
         {/* Backdrop */}
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
           onClick={handleCancel}
         />
-        
+
         {/* Dialog */}
         <div className="flex min-h-full items-center justify-center p-4">
           <div className="relative w-full max-w-lg bg-white dark:bg-gray-800 rounded-lg shadow-xl transform transition-all duration-300 ease-out">
@@ -79,13 +78,13 @@ export const useConfirmDialog = () => {
                 </svg>
               </button>
             </div>
-            
+
             {/* Content */}
             <div className="p-6">
               <p className="text-gray-700 dark:text-gray-300">
                 {dialogState.message}
               </p>
-              
+
               <div className="flex justify-end space-x-3 mt-6">
                 <button
                   onClick={handleCancel}
@@ -95,11 +94,10 @@ export const useConfirmDialog = () => {
                 </button>
                 <button
                   onClick={handleConfirm}
-                  className={`px-4 py-2 rounded-md transition-colors ${
-                    dialogState.confirmVariant === 'danger'
+                  className={`px-4 py-2 rounded-md transition-colors ${dialogState.confirmVariant === 'danger'
                       ? 'bg-red-600 hover:bg-red-700 text-white'
                       : 'bg-primary-600 hover:bg-primary-700 text-white'
-                  }`}
+                    }`}
                 >
                   {dialogState.confirmText}
                 </button>
