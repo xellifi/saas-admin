@@ -15,6 +15,11 @@ const dbConfig = {
   }
 };
 
+console.log('[DB Debug] Host:', dbConfig.host);
+console.log('[DB Debug] User:', dbConfig.user);
+console.log('[DB Debug] Database:', dbConfig.database);
+console.log('[DB Debug] SSL Configured:', !!dbConfig.ssl);
+
 // Create connection pool
 const pool = mysql.createPool(dbConfig);
 

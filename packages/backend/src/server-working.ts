@@ -9,7 +9,7 @@ import jwt from '@fastify/jwt';
 import { addonRoutes } from './routes/addons';
 import cors from '@fastify/cors';
 import { authenticate } from './middleware/auth';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import {
   testConnection,
   getUserByEmail,
@@ -72,14 +72,7 @@ server.register(jwt, {
   secret: process.env.JWT_SECRET || 'mySaaSsupersecret2026keychangeinprod'
 });
 
-// Test database connection on startup (non-blocking)
-testConnection().then(connected => {
-  if (!connected) {
-    console.log('⚠️  Database not connected, but server will continue...');
-  }
-}).catch(error => {
-  console.log('⚠️  Database test failed:', error.message);
-});
+// Note: Database connection test moved into start() for better serverless control
 
 // Note: Removed manual CORS hooks in favor of @fastify/cors plugin
 
