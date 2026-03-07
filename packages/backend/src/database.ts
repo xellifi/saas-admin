@@ -1,7 +1,7 @@
 import mysql from 'mysql2/promise';
 
 // Database connection configuration
-const dbConfig = {
+const dbConfig: any = {
   host: process.env.DB_HOST || '127.0.0.1',
   port: parseInt(process.env.DB_PORT || '3306'),
   user: process.env.DB_USER || 'root',
@@ -9,11 +9,14 @@ const dbConfig = {
   database: process.env.DB_NAME || 'saas_dashboard',
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0,
-  ssl: {
-    rejectUnauthorized: false // Required for Aiven
-  }
+  queueLimit: 0
 };
+
+if (process.env.DB_SSL === 'true') {
+  dbConfig.ssl = {
+    rejectUnauthorized: false
+  };
+}
 
 console.log('[DB Debug] Host:', dbConfig.host);
 console.log('[DB Debug] User:', dbConfig.user);
