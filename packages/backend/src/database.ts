@@ -9,8 +9,10 @@ const dbConfig = {
   database: process.env.DB_NAME || 'saas_dashboard',
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
-  // Note: family: 4 causes warnings with mysql2, using default
+  queueLimit: 0,
+  ssl: {
+    rejectUnauthorized: false // Required for Aiven
+  }
 };
 
 // Create connection pool

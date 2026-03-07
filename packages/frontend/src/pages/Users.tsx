@@ -51,7 +51,7 @@ const UsersPage: React.FC = () => {
   const fetchUsers = useCallback(async () => {
     try {
       setLoading(true)
-      const response = await fetch('http://localhost:3001/api/users')
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/users`)
       if (!response.ok) throw new Error('Failed to fetch users')
       const data = await response.json()
       setUsers(data.users || [])
@@ -149,8 +149,8 @@ const UsersPage: React.FC = () => {
 
     try {
       const url = modalMode === 'add'
-        ? 'http://localhost:3001/api/users'
-        : `http://localhost:3001/api/users/${editingUser?.id}`
+        ? `${import.meta.env.VITE_API_URL}/users`
+        : `${import.meta.env.VITE_API_URL}/users/${editingUser?.id}`
 
       const method = modalMode === 'add' ? 'POST' : 'PUT'
 
@@ -194,7 +194,7 @@ const UsersPage: React.FC = () => {
       confirmVariant: 'danger',
       onConfirm: async () => {
         try {
-          const response = await fetch(`http://localhost:3001/api/users/${user.id}`, {
+          const response = await fetch(`${import.meta.env.VITE_API_URL}/users/${user.id}`, {
             method: 'DELETE'
           })
           if (!response.ok) throw new Error('Failed to delete user')

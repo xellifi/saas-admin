@@ -248,9 +248,9 @@ const RolesPermissions: React.FC = () => {
 
             const token = localStorage.getItem('accessToken')
             const [rolesRes, usersRes, profileRes] = await Promise.all([
-                fetch('http://localhost:3001/api/roles'),
-                fetch('http://localhost:3001/api/users'),
-                fetch('http://localhost:3001/api/auth/profile', {
+                fetch(`${import.meta.env.VITE_API_URL}/roles`),
+                fetch(`${import.meta.env.VITE_API_URL}/users`),
+                fetch(`${import.meta.env.VITE_API_URL}/auth/profile`, {
                     headers: token ? { 'Authorization': `Bearer ${token}` } : {}
                 })
             ])
@@ -352,8 +352,8 @@ const RolesPermissions: React.FC = () => {
         e.preventDefault()
         try {
             const url = roleModalMode === 'add'
-                ? 'http://localhost:3001/api/roles'
-                : `http://localhost:3001/api/roles/${editingRole?.id}`
+                ? `${import.meta.env.VITE_API_URL}/roles`
+                : `${import.meta.env.VITE_API_URL}/roles/${editingRole?.id}`
 
             const method = roleModalMode === 'add' ? 'POST' : 'PUT'
 
@@ -389,7 +389,7 @@ const RolesPermissions: React.FC = () => {
             confirmVariant: 'danger',
             onConfirm: async () => {
                 try {
-                    const response = await fetch(`http://localhost:3001/api/roles/${role.id}`, {
+                    const response = await fetch(`${import.meta.env.VITE_API_URL}/roles/${role.id}`, {
                         method: 'DELETE'
                     })
 
@@ -417,7 +417,7 @@ const RolesPermissions: React.FC = () => {
 
     const handleUserRoleChange = async (userId: number, newRole: string) => {
         try {
-            const response = await fetch(`http://localhost:3001/api/users/${userId}`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/users/${userId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ role: newRole })
@@ -442,7 +442,7 @@ const RolesPermissions: React.FC = () => {
 
     const handleUserStatusChange = async (userId: number, newStatus: string) => {
         try {
-            const response = await fetch(`http://localhost:3001/api/users/${userId}`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/users/${userId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status: newStatus })

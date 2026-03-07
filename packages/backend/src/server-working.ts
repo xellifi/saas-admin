@@ -5,6 +5,7 @@ import multipart from '@fastify/multipart';
 import fastifyStatic from '@fastify/static';
 import jwt from '@fastify/jwt';
 import { addonRoutes } from './routes/addons';
+import cors from '@fastify/cors';
 import { authenticate } from './middleware/auth';
 import bcrypt from 'bcrypt';
 import {
@@ -43,6 +44,19 @@ server.register(multipart, {
   },
 });
 
+// Register CORS
+server.register(cors, {
+  origin: [
+    'https://saas-admin-frontend.vercel.app',
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:5173'
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+});
+
 // Register static for uploads
 server.register(fastifyStatic, {
   root: path.join(process.cwd(), 'uploads'),
@@ -63,17 +77,7 @@ testConnection().then(connected => {
   console.log('⚠️  Database test failed:', error.message);
 });
 
-// Enable CORS
-server.addHook('preHandler', async (request, reply) => {
-  reply.header('Access-Control-Allow-Origin', '*');
-  reply.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
-  reply.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
-});
-
-// Handle OPTIONS
-server.options('/*', async (request, reply) => {
-  reply.send();
-});
+// Note: Removed manual CORS hooks in favor of @fastify/cors plugin
 
 // Root route
 server.get('/', async () => {
@@ -275,24 +279,24 @@ server.post('/api/auth/login', async (request, reply) => {
 
     if (!user) {
       console.log('❌ User not found in database:', cleanEmail);
-      
+
       // Fallback to mock authentication for demo purposes
       const mockUsers = {
         'superadmin@saas.com': { id: 1, role: 'superadmin', firstName: 'Super', lastName: 'Admin' },
         'admin@saas.com': { id: 2, role: 'admin', firstName: 'Admin', lastName: 'User' },
         'user@saas.com': { id: 3, role: 'user', firstName: 'Regular', lastName: 'User' }
       };
-      
+
       const mockUser = mockUsers[cleanEmail];
       if (mockUser && cleanPassword === 'admin123') {
         console.log('✅ Using mock authentication for:', cleanEmail);
-        
+
         const token = server.jwt.sign({
           id: mockUser.id,
           email: cleanEmail,
           role: mockUser.role
         });
-        
+
         return {
           success: true,
           data: {
@@ -311,7 +315,7 @@ server.post('/api/auth/login', async (request, reply) => {
           }
         };
       }
-      
+
       return reply.status(401).send({ error: 'Invalid credentials' });
     }
 

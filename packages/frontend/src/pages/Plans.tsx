@@ -43,7 +43,7 @@ const PlansPage: React.FC = () => {
   const fetchPlans = async () => {
     try {
       setLoading(true)
-      const response = await fetch('http://localhost:3001/api/plans')
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/plans`)
       if (!response.ok) throw new Error('Failed to fetch plans')
       const data = await response.json()
       setPlans(data.plans || [])
@@ -85,7 +85,7 @@ const PlansPage: React.FC = () => {
       confirmVariant: 'danger',
       onConfirm: async () => {
         try {
-          const response = await fetch(`http://localhost:3001/api/plans/${plan.id}`, {
+          const response = await fetch(`${import.meta.env.VITE_API_URL}/plans/${plan.id}`, {
             method: 'DELETE'
           })
 
@@ -149,8 +149,8 @@ const PlansPage: React.FC = () => {
 
     try {
       const url = modalMode === 'add'
-        ? 'http://localhost:3001/api/plans'
-        : `http://localhost:3001/api/plans/${editingPlan?.id}`
+        ? `${import.meta.env.VITE_API_URL}/plans`
+        : `${import.meta.env.VITE_API_URL}/plans/${editingPlan?.id}`
 
       const method = modalMode === 'add' ? 'POST' : 'PUT'
 
