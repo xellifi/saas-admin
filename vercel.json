@@ -3,24 +3,11 @@
     "rewrites": [
         {
             "source": "/api/(.*)",
-            "destination": "api/index.ts"
+            "destination": "/api/index.ts"
         },
         {
             "source": "/((?!api/).*)",
             "destination": "/index.html"
-        }
-    ],
-    "builds": [
-        {
-            "src": "packages/frontend/package.json",
-            "use": "@vercel/static-build",
-            "config": {
-                "distDir": "dist"
-            }
-        },
-        {
-            "src": "api/index.ts",
-            "use": "@vercel/node"
         }
     ]
 }
