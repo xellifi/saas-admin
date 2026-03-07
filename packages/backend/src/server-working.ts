@@ -2,6 +2,7 @@
 import fastify from 'fastify';
 import dotenv from 'dotenv';
 dotenv.config();
+import { existsSync, mkdirSync } from 'fs';
 import path from 'path';
 import multipart from '@fastify/multipart';
 import fastifyStatic from '@fastify/static';
@@ -61,11 +62,23 @@ server.register(cors, {
   credentials: true
 });
 
-// Register static for uploads
-server.register(fastifyStatic, {
-  root: path.join(process.cwd(), 'uploads'),
-  prefix: '/uploads/', // optional: default '/'
-});
+// Register static for uploads (only if the directory exists — it won't on Vercel)
+const uploadsDir = path.join(process.cwd(), 'uploads');
+if (!process.env.VERCEL && existsSync(uploadsDir)) {
+  server.register(fastifyStatic, {
+    root: uploadsDir,
+    prefix: '/uploads/',
+  });
+} else {
+  // Ensure the dir exists locally for dev; skip on Vercel
+  if (!process.env.VERCEL) {
+    try { mkdirSync(uploadsDir, { recursive: true }); } catch { }
+    server.register(fastifyStatic, {
+      root: uploadsDir,
+      prefix: '/uploads/',
+    });
+  }
+}
 
 // Register JWT
 server.register(jwt, {
@@ -787,9 +800,7 @@ server.delete('/api/support/tickets/:id', async (request, reply) => {
 server.register(addonRoutes, { prefix: '/api' });
 
 // Addon engine will be initialized in start()
-
-// 4. Start file watcher for hot reload (dev only)
-AddonWatcher.start(server);
+// Note: AddonWatcher.start() is called inside start() — not here at module-level
 
 // Dashboard stats
 server.get('/api/dashboard/stats', async (request, reply) => {

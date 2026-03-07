@@ -35,7 +35,13 @@ export const useAuthStore = create<AuthState>()(
             body: JSON.stringify(credentials),
           })
 
-          const data = await response.json()
+          let data: any
+          try {
+            data = await response.json()
+          } catch {
+            // Vercel/server returned non-JSON (e.g. HTML error page)
+            throw new Error(`Server error (${response.status}). Please try again later.`)
+          }
 
           if (!response.ok) {
             throw new Error(data.error || 'Login failed')
