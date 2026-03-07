@@ -47,11 +47,14 @@ export const useAuthStore = create<AuthState>()(
             throw new Error(data.error || 'Login failed')
           }
 
-          // Backend returns { success: true, data: { user, accessToken, refreshToken } }
+          // Handle multiple possible backend response shapes:
+          // Mock login:  { success, data: { user, accessToken, refreshToken } }
+          // DB login:    { user, accessToken, refreshToken }
+          // Legacy:      { user, token, refreshToken }
           const responseData = data.data || data
           const authData = {
             user: responseData.user,
-            accessToken: responseData.accessToken,
+            accessToken: responseData.accessToken || responseData.token,
             refreshToken: responseData.refreshToken,
           }
 

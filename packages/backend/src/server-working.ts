@@ -298,7 +298,7 @@ server.post('/api/auth/login', async (request, reply) => {
       };
 
       const mockUser = mockUsers[cleanEmail];
-      if (mockUser && cleanPassword === 'admin123') {
+      if (mockUser && (cleanPassword === 'SuperPass123!' || cleanPassword === 'AdminPass123!' || cleanPassword === 'UserPass123!' || cleanPassword === 'admin123')) {
         console.log('✅ Using mock authentication for:', cleanEmail);
 
         const token = server.jwt.sign({
@@ -404,7 +404,7 @@ server.post('/api/auth/login', async (request, reply) => {
         updatedAt: user.updated_at || user.updatedAt,
         permissions
       },
-      token: accessToken,
+      accessToken: accessToken,
       refreshToken: refreshToken
     };
   } catch (error) {
