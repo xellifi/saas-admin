@@ -57,8 +57,14 @@ const AddonContent: React.FC = () => {
             return React.lazy(importFn as any);
         }
 
-        console.warn(`Addon component not found for path: ${targetPath}. Check folder name casing: ${folderName}`);
-        return null;
+        return () => (
+            <div className="p-4 bg-red-50 text-red-900 overflow-auto">
+                <h3 className="font-bold">Debug Info</h3>
+                <p><strong>Attempted Target:</strong> {targetPath}</p>
+                <p><strong>Available components from Glob:</strong></p>
+                <pre className="text-xs">{JSON.stringify(Object.keys(addonComponents), null, 2)}</pre>
+            </div>
+        );
     }, [addon, currentRoute]);
 
     // Legacy fallback logic for fetching data if no custom component exists

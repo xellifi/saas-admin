@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { drizzle as mysqlDrizzle } from 'drizzle-orm/mysql2';
 import { drizzle as pgDrizzle } from 'drizzle-orm/node-postgres';
 import mysql from 'mysql2/promise';

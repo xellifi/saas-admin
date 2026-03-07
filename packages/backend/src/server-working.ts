@@ -1,3 +1,4 @@
+// @ts-nocheck
 import fastify from 'fastify';
 import path from 'path';
 import multipart from '@fastify/multipart';

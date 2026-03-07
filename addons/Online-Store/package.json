@@ -1,6 +1,6 @@
 {
     "name": "online-store-addon",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "description": "A fully functional Online Store addon for the SaaS Dashboard",
     "main": "src/api/index.js",
     "type": "module",

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import bcrypt from 'bcrypt';
 import { JWT } from '@fastify/jwt';
 

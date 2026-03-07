@@ -283,7 +283,14 @@ export async function addonRoutes(fastify: FastifyInstance) {
 
       await AddonManager.installAddon(fastify, parseInt(id))
 
-      return reply.send({ success: true, message: 'Addon installed successfully' })
+      // Production Fastify requires a full restart to register new plugins 
+      // added dynamically. PM2 or Docker will auto-restart the process cleanly.
+      setTimeout(() => {
+        console.log('🔄 Restarting backend server to load new addon routes...');
+        process.exit(0);
+      }, 1500);
+
+      return reply.send({ success: true, message: 'Addon installed successfully. Server is restarting to apply changes.' })
     } catch (error: any) {
       console.error('📦 Install failed:', error)
       return reply.status(error.message?.includes('not found') ? 404 : 500).send({

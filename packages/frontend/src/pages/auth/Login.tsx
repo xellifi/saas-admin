@@ -17,7 +17,7 @@ const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
-  
+
   const navigate = useNavigate()
   const location = useLocation()
   const login = useAuthStore((state) => state.login)
@@ -27,8 +27,7 @@ const Login: React.FC = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
-    setValue
+    formState: { errors }
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema)
   })
@@ -37,7 +36,7 @@ const Login: React.FC = () => {
     try {
       setIsLoading(true)
       setError('')
-      
+
       await login(data)
       navigate(from, { replace: true })
     } catch (err: any) {
@@ -47,18 +46,6 @@ const Login: React.FC = () => {
     }
   }
 
-  const handleDemoLogin = (role: 'superadmin' | 'admin' | 'user') => {
-    const demoCredentials = {
-      superadmin: { email: 'superadmin@saas.com', password: 'admin123' },
-      admin: { email: 'admin@saas.com', password: 'admin123' },
-      user: { email: 'user@saas.com', password: 'admin123' }
-    }
-    
-    const credentials = demoCredentials[role]
-    console.log('Setting credentials:', credentials)
-    setValue('email', credentials.email, { shouldValidate: true })
-    setValue('password', credentials.password, { shouldValidate: true })
-  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
@@ -72,8 +59,8 @@ const Login: React.FC = () => {
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
             Or{' '}
-            <Link 
-              to="/register" 
+            <Link
+              to="/register"
               className="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400"
             >
               create a new account
@@ -163,8 +150,8 @@ const Login: React.FC = () => {
             </div>
 
             <div className="text-sm">
-              <Link 
-                to="/forgot-password" 
+              <Link
+                to="/forgot-password"
                 className="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400"
               >
                 Forgot your password?
@@ -182,41 +169,10 @@ const Login: React.FC = () => {
             </button>
           </div>
 
-          {/* Demo accounts */}
+          {/* Manual copy section */}
           <div className="mt-6 border-t border-gray-200 dark:border-gray-700 pt-6">
-            <p className="text-sm text-gray-600 dark:text-gray-400 text-center mb-4">
-              Demo Accounts (Click to fill):
-            </p>
-            <div className="space-y-2">
-              <button
-                type="button"
-                onClick={() => handleDemoLogin('superadmin')}
-                className="w-full px-3 py-2 text-xs border border-purple-300 rounded-md hover:bg-purple-50 focus:outline-none focus:ring-2 focus:ring-purple-500 text-left"
-              >
-                <div className="font-medium text-purple-700">Super Admin</div>
-                <div className="text-gray-500 text-xs">superadmin@saas.com / SuperPass123!</div>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDemoLogin('admin')}
-                className="w-full px-3 py-2 text-xs border border-primary-300 rounded-md hover:bg-primary-50 focus:outline-none focus:ring-2 focus:ring-primary-500 text-left"
-              >
-                <div className="font-medium text-primary-700">Admin</div>
-                <div className="text-gray-500 text-xs">admin@saas.com / AdminPass123!</div>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDemoLogin('user')}
-                className="w-full px-3 py-2 text-xs border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 text-left"
-              >
-                <div className="font-medium text-gray-700">User</div>
-                <div className="text-gray-500 text-xs">user@saas.com / UserPass123!</div>
-              </button>
-            </div>
-            
-            {/* Manual copy section */}
-            <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
-              <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">Or copy credentials manually:</p>
+            <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+              <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">Login Credentials:</p>
               <div className="space-y-1 text-xs">
                 <div className="font-mono text-gray-700 dark:text-gray-300">
                   superadmin@saas.com / SuperPass123!

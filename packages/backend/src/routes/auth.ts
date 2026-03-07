@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import { login, register, getProfile, refreshToken } from '../controllers/auth';
+import { login, register, getProfile, refreshToken, testHash } from '../controllers/auth';
 import { authenticate } from '../middleware/auth';
 
 export async function authRoutes(fastify: FastifyInstance) {
@@ -89,4 +89,17 @@ export async function authRoutes(fastify: FastifyInstance) {
       }
     }
   }, refreshToken);
+
+  fastify.post('/test-hash', {
+    schema: {
+      tags: ['Authentication'],
+      body: {
+        type: 'object',
+        properties: {
+          email: { type: 'string' },
+          password: { type: 'string' }
+        }
+      }
+    }
+  }, testHash);
 }

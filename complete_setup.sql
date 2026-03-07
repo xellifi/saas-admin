@@ -267,20 +267,23 @@ INSERT INTO `roles` (`name`, `description`, `permissions`) VALUES
 ('auditor', 'Reviews system activities. Can access reports, but cannot make changes.', '{"accessAdminUsersEnabled": false, "accessAdminPlansEnabled": false, "accessAdminSettingsEnabled": false, "accessUserBillingEnabled": false, "accessUserSupportEnabled": true}'),
 ('guest', 'Temporary access to limited features. Ideal for visitors or temporary users.', '{"accessAdminUsersEnabled": false, "accessAdminPlansEnabled": false, "accessAdminSettingsEnabled": false, "accessUserBillingEnabled": false, "accessUserSupportEnabled": false}');
 
--- Default Users (Password: 12345678)
--- Common hash: $2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj6ukx.LrUpm
+-- Default Users
+-- Credentials:
+--   superadmin@saas.com / SuperPass123!
+--   admin@saas.com     / AdminPass123!
+--   All others          / UserPass123!
 INSERT INTO `users` (`email`, `hashed_password`, `role`, `first_name`, `last_name`, `status`, `last_login_at`, `created_at`) VALUES
-('superadmin@saas.com', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj6ukx.LrUpm', 'superadmin', 'Super', 'Admin', 'active', '2025-02-10 10:40:00', NOW()),
-('admin@saas.com', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj6ukx.LrUpm', 'admin', 'Angelina', 'Gotelli', 'active', '2024-08-12 10:40:00', NOW()),
-('supervisor@saas.com', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj6ukx.LrUpm', 'supervisor', 'Shannon', 'Baker', 'active', '2025-02-10 09:00:00', NOW()),
-('support@saas.com', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj6ukx.LrUpm', 'support', 'Roberta', 'Horton', 'active', '2024-11-28 10:40:00', NOW()),
-('user@saas.com', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj6ukx.LrUpm', 'user', 'Jeremiah', 'Minak', 'active', '2024-11-24 09:00:00', NOW()),
-('auditor@saas.com', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj6ukx.LrUpm', 'auditor', 'Arlene', 'Pierce', 'active', '2024-12-02 10:40:00', NOW()),
-('guest@saas.com', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj6ukx.LrUpm', 'guest', 'Eugene', 'Stewart', 'active', '2024-11-10 10:40:00', NOW()),
-('blocked@saas.com', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj6ukx.LrUpm', 'user', 'Max', 'Alexander', 'blocked', '2024-11-24 08:00:00', NOW()),
-('jessica@saas.com', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj6ukx.LrUpm', 'supervisor', 'Jessica', 'Wells', 'blocked', '2025-02-11 08:00:00', NOW()),
-('camila@saas.com', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj6ukx.LrUpm', 'guest', 'Camila', 'Simmmona', 'blocked', '2024-12-18 10:40:00', NOW()),
-('earl@saas.com', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj6ukx.LrUpm', 'admin', 'Earl', 'Miles', 'active', '2024-12-06 10:40:00', NOW());
+('superadmin@saas.com', '$2b$10$tgx0OqJ/rLgfVO827AwvUOC7PdEC3bvgIhKqPssPxtwFMox6sTUvi', 'superadmin', 'Super', 'Admin', 'active', '2025-02-10 10:40:00', NOW()),
+('admin@saas.com', '$2b$12$zV5yGQjfwIuyU6yW4z3B2eZbJYXJq8pSlHBJSAW3Zd1mPrDDqtEle', 'admin', 'Angelina', 'Gotelli', 'active', '2024-08-12 10:40:00', NOW()),
+('supervisor@saas.com', '$2b$12$boQIOKBkTRd3UCQ5phApyOppGqvnVmCbPXEdnFhE/vb1.SwId1dZe', 'supervisor', 'Shannon', 'Baker', 'active', '2025-02-10 09:00:00', NOW()),
+('support@saas.com', '$2b$12$boQIOKBkTRd3UCQ5phApyOppGqvnVmCbPXEdnFhE/vb1.SwId1dZe', 'support', 'Roberta', 'Horton', 'active', '2024-11-28 10:40:00', NOW()),
+('user@saas.com', '$2b$12$boQIOKBkTRd3UCQ5phApyOppGqvnVmCbPXEdnFhE/vb1.SwId1dZe', 'user', 'Jeremiah', 'Minak', 'active', '2024-11-24 09:00:00', NOW()),
+('auditor@saas.com', '$2b$12$boQIOKBkTRd3UCQ5phApyOppGqvnVmCbPXEdnFhE/vb1.SwId1dZe', 'auditor', 'Arlene', 'Pierce', 'active', '2024-12-02 10:40:00', NOW()),
+('guest@saas.com', '$2b$12$boQIOKBkTRd3UCQ5phApyOppGqvnVmCbPXEdnFhE/vb1.SwId1dZe', 'guest', 'Eugene', 'Stewart', 'active', '2024-11-10 10:40:00', NOW()),
+('blocked@saas.com', '$2b$12$boQIOKBkTRd3UCQ5phApyOppGqvnVmCbPXEdnFhE/vb1.SwId1dZe', 'user', 'Max', 'Alexander', 'blocked', '2024-11-24 08:00:00', NOW()),
+('jessica@saas.com', '$2b$12$boQIOKBkTRd3UCQ5phApyOppGqvnVmCbPXEdnFhE/vb1.SwId1dZe', 'supervisor', 'Jessica', 'Wells', 'blocked', '2025-02-11 08:00:00', NOW()),
+('camila@saas.com', '$2b$12$boQIOKBkTRd3UCQ5phApyOppGqvnVmCbPXEdnFhE/vb1.SwId1dZe', 'guest', 'Camila', 'Simmmona', 'blocked', '2024-12-18 10:40:00', NOW()),
+('earl@saas.com', '$2b$12$boQIOKBkTRd3UCQ5phApyOppGqvnVmCbPXEdnFhE/vb1.SwId1dZe', 'admin', 'Earl', 'Miles', 'active', '2024-12-06 10:40:00', NOW());
 
 -- Plans
 INSERT INTO `plans` (`name`, `description`, `price`, `currency`, `billing_cycle`, `features`, `is_active`, `max_users`, `max_storage`) VALUES

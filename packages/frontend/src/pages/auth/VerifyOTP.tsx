@@ -51,7 +51,7 @@ const VerifyOTP: React.FC = () => {
     return () => clearInterval(timer)
   }, [email, navigate])
 
-  const onSubmit = async (_data: OTPFormData) => {
+  const onSubmit = async (data: OTPFormData) => {
     try {
       setIsLoading(true)
       setError('')

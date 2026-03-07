@@ -1,9 +1,11 @@
 import React, { useEffect } from 'react'
 import { X } from 'lucide-react'
+import type { MouseEvent } from 'react'
 
 interface DialogProps {
   isOpen: boolean
-  onRequestClose?: (e: any) => void
+  onClose: (e: MouseEvent) => void
+  onRequestClose: (e: MouseEvent) => void
   children: React.ReactNode
   title?: string
   size?: 'sm' | 'md' | 'lg' | 'xl'
@@ -11,6 +13,7 @@ interface DialogProps {
 
 const Dialog: React.FC<DialogProps> = ({
   isOpen,
+  onClose,
   onRequestClose,
   children,
   title,
@@ -19,7 +22,7 @@ const Dialog: React.FC<DialogProps> = ({
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
-        onRequestClose?.(e as any)
+        onRequestClose(e as any)
       }
     }
 
@@ -54,7 +57,7 @@ const Dialog: React.FC<DialogProps> = ({
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
-        onClick={(e) => onRequestClose?.(e as any)}
+        onClick={onRequestClose}
       />
 
       {/* Dialog */}
@@ -76,7 +79,7 @@ const Dialog: React.FC<DialogProps> = ({
               )}
               {onRequestClose && (
                 <button
-                  onClick={(e) => onRequestClose?.(e)}
+                  onClick={(e) => onRequestClose(e)}
                   className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                 >
                   <X className="w-5 h-5 text-gray-400" />

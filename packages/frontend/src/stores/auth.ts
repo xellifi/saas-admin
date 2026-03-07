@@ -41,11 +41,12 @@ export const useAuthStore = create<AuthState>()(
             throw new Error(data.error || 'Login failed')
           }
 
-          // Simple backend returns data directly, not wrapped in data.success
+          // Backend returns { success: true, data: { user, accessToken, refreshToken } }
+          const responseData = data.data || data
           const authData = {
-            user: data.user,
-            accessToken: data.token,
-            refreshToken: data.refreshToken,
+            user: responseData.user,
+            accessToken: responseData.accessToken,
+            refreshToken: responseData.refreshToken,
           }
 
           set({

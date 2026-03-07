@@ -3,10 +3,13 @@ import {
   Puzzle,
   Upload,
   Download,
+  Settings,
   Trash2,
   Play,
+  Square,
   Package,
   CheckCircle,
+  Clock,
   RefreshCw
 } from 'lucide-react'
 import { Addon } from '@/types'
@@ -116,7 +119,7 @@ const Addons: React.FC = () => {
   }
 
   const handleUninstallAddon = async (addon: Addon) => {
-    await confirm({
+    const result = await confirm({
       title: 'Uninstall Addon',
       message: `Are you sure you want to uninstall "${addon.name}"? This will remove its data and integrations, but keep the files so you can reinstall later.`,
       confirmText: 'Uninstall',
@@ -144,7 +147,7 @@ const Addons: React.FC = () => {
       return
     }
 
-    await confirm({
+    const result = await confirm({
       title: 'Delete Addon',
       message: `Are you sure you want to completely delete "${addon.name}"? This removes the files permanently.`,
       confirmText: 'Delete',
@@ -179,6 +182,14 @@ const Addons: React.FC = () => {
     return 'px-2 py-1 text-amber-600 dark:text-amber-500 font-bold text-xs uppercase tracking-wider rounded border border-amber-500/50 dark:border-amber-400/50'
   }
 
+  // Format date
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    })
+  }
 
   return (
     <div className="space-y-6">

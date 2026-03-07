@@ -4,12 +4,25 @@ import {
   TrendingUp,
   CreditCard,
   Activity,
+  ArrowUpRight,
+  ArrowDownRight,
+  ChevronDown,
   ShoppingCart,
   Package,
   DollarSign,
   UserPlus
 } from 'lucide-react'
-
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar
+} from 'recharts'
 import NotificationType from '@/components/NotificationType'
 // Use store-style stat cards directly for perfect visual parity
 
@@ -41,7 +54,7 @@ const Dashboard: React.FC = () => {
         if (!statsResponse.ok) {
           throw new Error('Failed to fetch dashboard stats')
         }
-        const statsData = await statsResponse.json() as { stats: any }
+        const statsData = await statsResponse.json()
         setStats(statsData.stats)
 
         // Fetch recent activity
@@ -73,6 +86,23 @@ const Dashboard: React.FC = () => {
   }, [])
 
   // Generate mock chart data based on real stats
+  const userGrowthData = [
+    { month: 'Jan', users: Math.max(0, (stats.totalUsers || 0) - 200) },
+    { month: 'Feb', users: Math.max(0, (stats.totalUsers || 0) - 150) },
+    { month: 'Mar', users: Math.max(0, (stats.totalUsers || 0) - 100) },
+    { month: 'Apr', users: Math.max(0, (stats.totalUsers || 0) - 50) },
+    { month: 'May', users: Math.max(0, (stats.totalUsers || 0) - 25) },
+    { month: 'Jun', users: stats.totalUsers || 0 }
+  ]
+
+  const revenueData = [
+    { month: 'Jan', revenue: Math.max(0, (stats.totalRevenue || 0) * 0.1) },
+    { month: 'Feb', revenue: Math.max(0, (stats.totalRevenue || 0) * 0.2) },
+    { month: 'Mar', revenue: Math.max(0, (stats.totalRevenue || 0) * 0.3) },
+    { month: 'Apr', revenue: Math.max(0, (stats.totalRevenue || 0) * 0.4) },
+    { month: 'May', revenue: Math.max(0, (stats.totalRevenue || 0) * 0.6) },
+    { month: 'Jun', revenue: stats.totalRevenue || 0 }
+  ]
 
   const statCards = [
     {
