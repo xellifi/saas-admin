@@ -1,5 +1,7 @@
 // @ts-nocheck
 import fastify from 'fastify';
+import dotenv from 'dotenv';
+dotenv.config();
 import path from 'path';
 import multipart from '@fastify/multipart';
 import fastifyStatic from '@fastify/static';
@@ -46,12 +48,14 @@ server.register(multipart, {
 
 // Register CORS
 server.register(cors, {
-  origin: [
-    'https://saas-admin-frontend.vercel.app',
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'http://localhost:5173'
-  ],
+  origin: process.env.CORS_ORIGIN === '*'
+    ? true
+    : (process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : [
+      'https://saas-admin-frontend.vercel.app',
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'http://localhost:5173'
+    ]),
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
