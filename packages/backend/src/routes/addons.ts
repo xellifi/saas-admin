@@ -9,8 +9,12 @@ import { AddonManager } from '../lib/addon-manager'
 const UPLOAD_DIR = join(process.cwd(), 'uploads', 'addons')
 const ROOT_ADDONS_DIR = AddonManager.getAddonsDir()
 
-// Ensure directories exist
-if (!existsSync(UPLOAD_DIR)) mkdirSync(UPLOAD_DIR, { recursive: true })
+// Ensure directories exist (skip on Vercel — read-only filesystem)
+if (!process.env.VERCEL) {
+  try {
+    if (!existsSync(UPLOAD_DIR)) mkdirSync(UPLOAD_DIR, { recursive: true })
+  } catch { /* read-only FS */ }
+}
 
 // Helper: recursively find a file in a directory tree
 function findFileRecursive(dir: string, filename: string): string | null {
