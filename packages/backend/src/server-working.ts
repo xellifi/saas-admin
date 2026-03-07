@@ -1030,7 +1030,11 @@ server.get('/api/activity/logs', async (request, reply) => {
   }
 });
 
+let started = false;
+
 export const start = async () => {
+  if (started) return server;
+  started = true;
   try {
     // Test database connection (non-blocking)
     const dbConnected = await testConnection();
