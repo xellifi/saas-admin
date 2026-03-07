@@ -1030,7 +1030,7 @@ server.get('/api/activity/logs', async (request, reply) => {
   }
 });
 
-const start = async () => {
+export const start = async () => {
   try {
     // Test database connection (non-blocking)
     const dbConnected = await testConnection();
@@ -1053,19 +1053,32 @@ const start = async () => {
     console.log('✅ Addon engine: registration complete');
 
     // 4. Start file watcher for hot reload (dev only)
-    AddonWatcher.start(server);
+    if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+      AddonWatcher.start(server);
+    }
 
-    // Run server
-    const port = Number(process.env.PORT) || 3001;
-    await server.listen({ port: port as number, host: '0.0.0.0' });
-    console.log(`🚀 Server listening at http://localhost:${port}`);
-    console.log(`📊 Health check: http://localhost:${port}/health`);
-    console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`🗄️  Database: ${dbConnected ? '✅ Connected' : '❌ Disconnected'}`);
+    // Run server ONLY if not in a serverless environment
+    if (!process.env.VERCEL) {
+      const port = Number(process.env.PORT) || 3001;
+      await server.listen({ port: port as number, host: '0.0.0.0' });
+      console.log(`🚀 Server listening at http://localhost:${port}`);
+    }
   } catch (err) {
     server.log.error(err);
-    process.exit(1);
+    if (!process.env.VERCEL) {
+      process.exit(1);
+    }
+    throw err;
   }
 };
 
-start();
+// Start the server if manually executed
+if (process.env.VERCEL === undefined) {
+  start().catch(err => {
+    console.error('Failed to start server:', err);
+    process.exit(1);
+  });
+}
+
+export { server };
+export default server;
